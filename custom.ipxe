@@ -3,10 +3,30 @@
 ### netboot.xyz-custom menu
 ###
 
-:start
-echo Hello world!
-sleep 10
+isset ${dhcp-server} && set ipparam ip=dhcp || set ipparam ip=${ip}::${gateway}:${netmask}:::none nameserver=${dns}
+set ipparam BOOTIF=${netX/mac} ${ipparam}
+
+:custom
+clear custom_choice
+menu This is a Test Menu
+item --gap Centos 7 aarch64
+item text ${space} text based installer
+choose custom_choice || goto custom_exit
+echo ${cls}
+goto ${custom_choice}
+goto custom_exit
+
+:text
+set install_mode inst.text ||
+imgfree
+kernel http://mirror.centos.org/altarch/7/os/aarch64/images/pxeboot/vmlinuz inst.repo=http://mirror.centos.org/altarch/7/os/aarch64 ${install_mode} ${ipparam} {{ kernel_params }}
+initrd http://mirror.centos.org/altarch/7/os/aarch64/images/pxeboot/initrd.img
+echo
+echo MD5sums:
+md5sum vmlinuz initrd.img
+boot
 goto custom_exit
 
 :custom_exit
+clear menu
 exit 0
